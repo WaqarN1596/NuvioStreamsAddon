@@ -161,6 +161,9 @@ async function get4KHDHubStreams(imdbId, type, season = null, episode = null) {
                     sandbox: {
                         eval: (str) => {
                             capturedUnpacked = str;
+                            console.log("--- DEBUG: UNPACKED CODE START ---");
+                            console.log(str);
+                            console.log("--- DEBUG: UNPACKED CODE END ---");
                             return str;
                         },
                         document: { getElementById: () => ({}) },
@@ -174,7 +177,7 @@ async function get4KHDHubStreams(imdbId, type, season = null, episode = null) {
                 if (capturedUnpacked) {
                     console.log(`[4KHDHub] Successfully unpacked JS.`);
                     // Find the master.m3u8 URL in the unpacked string
-                    const m3u8Match = capturedUnpacked.match(/(https:\/\/[^"'\s]*?master\.m3u8)/);
+                    const m3u8Match = capturedUnpacked.match(/(https?:\/\/[^"'\s]*?\.m3u8[^"'\s]*)/);
                     if (m3u8Match) {
                         masterM3u8Url = m3u8Match[1];
                     } else {
@@ -209,7 +212,8 @@ async function get4KHDHubStreams(imdbId, type, season = null, episode = null) {
         url: masterM3u8Url,
         behaviorHints: {
             bingeGroup: `4khdhub-player1`,
-            notWebReady: true // It's HLS, Stremio Web handles it, Roku Video node handles it natively!
+            notWebReady: true,
+            proxyUrl: player1Url
         }
     });
 

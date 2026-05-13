@@ -6,6 +6,9 @@ const addonInterface = require('./addon');
 const app = express();
 app.use(cors());
 
+app.use(express.json());
+app.use(express.text());
+
 app.use((req, res, next) => {
     let clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     if (clientIp && clientIp.includes(',')) {
@@ -13,6 +16,29 @@ app.use((req, res, next) => {
     }
     global.CLIENT_IP = clientIp;
     next();
+});
+
+// Endpoint for Roku to unpack JS
+app.post('/unpack', (req, res) => {
+    const code = req.body;
+    if (!code) return res.status(400).send("No code provided");
+
+    try {
+        const { VM } = require('vm2');
+        let unpacked = "";
+        const vm = new VM({
+            timeout: 1000,
+            sandbox: {
+                eval: (str) => { unpacked = str; return str; },
+                document: { getElementById: () => ({}) },
+                window: {}
+            }
+        });
+        vm.run(code);
+        res.send(unpacked);
+    } catch (e) {
+        res.status(500).send(e.message);
+    }
 });
 
 // Use the standard Stremio addon router
