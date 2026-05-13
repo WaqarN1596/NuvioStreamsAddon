@@ -18,6 +18,10 @@ app.use((req, res, next) => {
     next();
 });
 
+app.get('/test', (req, res) => {
+    res.send("Server is alive with custom routes!");
+});
+
 // Endpoint for Roku to unpack JS
 app.post('/unpack', (req, res) => {
     const code = req.body;
