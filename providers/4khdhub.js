@@ -8,11 +8,16 @@ const BASE_URL = 'https://new1.hdhub4u.limo';
 async function fetchText(url, options = {}) {
     try {
         console.log(`[4KHDHub] Fetching: ${url}`);
+        const headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            ...options.headers
+        };
+        if (global.CLIENT_IP) {
+            headers['X-Forwarded-For'] = global.CLIENT_IP;
+        }
+        
         const response = await axios.get(url, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                ...options.headers
-            },
+            headers: headers,
             timeout: 15000
         });
         return response.data;
@@ -47,12 +52,17 @@ async function fetchPageUrl(name, year, isSeries) {
         const searchUrl = `https://search.hdhub4u.glass/collections/post/documents/search?q=${encodeURIComponent(name)}&query_by=post_title,imdb_id&sort_by=sort_by_date:desc&limit=15`;
         console.log(`[4KHDHub] Searching via API: ${searchUrl}`);
         
+        const headers = {
+            'User-Agent': 'Mozilla/5.0',
+            'Origin': 'https://new1.hdhub4u.limo',
+            'Referer': 'https://new1.hdhub4u.limo/'
+        };
+        if (global.CLIENT_IP) {
+            headers['X-Forwarded-For'] = global.CLIENT_IP;
+        }
+
         const response = await axios.get(searchUrl, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0',
-                'Origin': 'https://new1.hdhub4u.limo',
-                'Referer': 'https://new1.hdhub4u.limo/'
-            },
+            headers: headers,
             timeout: 10000
         });
 
